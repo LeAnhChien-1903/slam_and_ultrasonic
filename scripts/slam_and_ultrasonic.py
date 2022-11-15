@@ -251,7 +251,7 @@ class slam_and_ultrasonic:
                     self.turnPIDCommand = False    
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.position[0], self.position[1], angle, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoints(self.dataPointAll, dataPoint)
+                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                     angleList = self.lib.generateAngleList(angle)
                     self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
                     self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
