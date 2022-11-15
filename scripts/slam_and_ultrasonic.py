@@ -226,7 +226,6 @@ class slam_and_ultrasonic:
         self.angularData = data.data
     def timerCallback(self, event):
         print("Angle = ", self.angularData)
-        print("Sensor0 = ", self.sonar0)
         if self.turnCommand == True:
             angle =  self.angularData
             if self.setTargetCommand == True:
@@ -246,6 +245,7 @@ class slam_and_ultrasonic:
                 else:
                     self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, angle)
                 if error < 0.1:
+                    print("Done angular")
                     self.turnCommand += 1
                     self.setTargetCommand = True
                     self.turnPIDCommand = False    
