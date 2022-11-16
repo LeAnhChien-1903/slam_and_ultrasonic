@@ -337,9 +337,9 @@ class slam_and_ultrasonic:
         if velocity > 8:
             velocity = 8
         if orientation == 0:
-            self.motor_params.data = [velocity, 0]
-        else:
             self.motor_params.data = [0, velocity]
+        else:
+            self.motor_params.data = [velocity, 0]
         self.pub_motor.publish(self.motor_params)
         rospy.loginfo(self.motor_params)
     def forward(self, velocity):
