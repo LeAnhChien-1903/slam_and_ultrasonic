@@ -225,6 +225,7 @@ class slam_and_ultrasonic:
     def angularDataCallback(self, data):
         self.angularData = data.data
     def timerCallback(self, event):
+        print("Angle = ", self.angularData)
         if self.turnCommand == True:
             if self.setTargetCommand == True:
                 initial =  self.angularData
@@ -243,7 +244,7 @@ class slam_and_ultrasonic:
                     self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData)
                 else:
                     self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData)
-                if error < 0.1:
+                if error < 1:
                     print("Done angular")
                     self.turnCommand += 1
                     self.setTargetCommand = True
@@ -285,7 +286,7 @@ class slam_and_ultrasonic:
                         self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData)
                     else:
                         self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData)
-                    if error < 0.1:
+                    if error < 1:
                         self.turnToMaxDistance = False
                         self.forwardCommand = True
                         self.turnPIDCommand = False
