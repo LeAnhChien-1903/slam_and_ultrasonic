@@ -172,7 +172,7 @@ class slam_and_ultrasonic:
         self.forwardCommand = False
         self.backwardCommand = False
         # PID parameter
-        self.kp = 10
+        self.kp = 15
         self.ki = 0
         self.kd = 0
         self.deltaT = 0.01
@@ -207,7 +207,7 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar135", Float32, self.sonar135Callback)
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
-        timer = rospy.Timer(rospy.Duration(0.04), self.timerCallback)
+        timer = rospy.Timer(rospy.Duration(0.03), self.timerCallback)
         rospy.spin()
         timer.shutdown()
     def sonar0Callback(self, data):
