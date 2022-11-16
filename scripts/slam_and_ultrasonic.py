@@ -246,7 +246,7 @@ class slam_and_ultrasonic:
                     self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData)
                 if error < 1:
                     print("Done angular")
-                    self.turnCommand += 1
+                    self.turnCount += 1
                     self.setTargetCommand = True
                     self.turnPIDCommand = False    
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
