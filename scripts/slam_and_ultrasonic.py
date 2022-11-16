@@ -307,7 +307,7 @@ class slam_and_ultrasonic:
             if self.backwardCommand == True:
                 velocity = 5
                 self.backward(velocity)
-                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, velocity , velocity, angle)
+                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, velocity , velocity, self.angularData)
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                 dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
