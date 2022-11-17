@@ -138,7 +138,7 @@ class slam_sonar_lib:
         return angleList
     def pidResponse(self, error, kp, ki, kd, sumError, prevError, deltaT):
         P = kp*error
-        sumError = sumError + error
+        sumError = sumError + error * deltaT
         I = ki * sumError
         D = kd * (error - prevError) / deltaT
         response= P + I + D
@@ -238,8 +238,10 @@ class slam_and_ultrasonic:
                 self.turnPIDCommand = True
             if self.turnPIDCommand == True:
                 [error, orientation] = self.lib.computeDifferent(self.angularData, self.target)
-                print("Error: ", self.error)
                 [velocity, self.sum, self.prev] = self.lib.pidResponse(error, self.kp, self.ki, self.kd, self.sum, self.prev, self.deltaT)
+                print("Error: ", error)
+                print("Target:", self.target)
+                print("Velocity:", velocity)            
                 self.turn(velocity, orientation)
                 if orientation == 0:
                     self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData)
