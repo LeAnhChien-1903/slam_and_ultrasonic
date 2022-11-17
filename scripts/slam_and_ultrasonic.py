@@ -238,6 +238,7 @@ class slam_and_ultrasonic:
                 self.turnPIDCommand = True
             if self.turnPIDCommand == True:
                 [error, orientation] = self.lib.computeDifferent(self.angularData, self.target)
+                print("Error: ", self.error)
                 [velocity, self.sum, self.prev] = self.lib.pidResponse(error, self.kp, self.ki, self.kd, self.sum, self.prev, self.deltaT)
                 self.turn(velocity, orientation)
                 if orientation == 0:
@@ -337,9 +338,9 @@ class slam_and_ultrasonic:
         if velocity > 8:
             velocity = 8
         if orientation == 0:
-            self.motor_params.data = [0, velocity]
-        else:
             self.motor_params.data = [velocity, 0]
+        else:
+            self.motor_params.data = [0, velocity]
         self.pub_motor.publish(self.motor_params)
         rospy.loginfo(self.motor_params)
     def forward(self, velocity):
