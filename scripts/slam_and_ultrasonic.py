@@ -141,8 +141,8 @@ class slam_sonar_lib:
         sumError = sumError + error * deltaT
         I = ki * sumError
         D = kd * (error - prevError) / deltaT
-        response= P + I + D
-        response = response / 100
+        response = P + I + D
+        response = response / 20
         sum = sumError
         prev = error
 
