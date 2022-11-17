@@ -142,7 +142,7 @@ class slam_sonar_lib:
         I = ki * sumError
         D = kd * (error - prevError) / deltaT
         response = P + I + D
-        response = response / 20
+        response = response
         sum = sumError
         prev = error
 
@@ -175,7 +175,7 @@ class slam_and_ultrasonic:
         self.kp = 15
         self.ki = 0
         self.kd = 0
-        self.deltaT = 0.01
+        self.deltaT = 0.05
         self.target = 0
         self.sum = 0
         self.prev = 0
@@ -207,7 +207,7 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar135", Float32, self.sonar135Callback)
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
-        timer = rospy.Timer(rospy.Duration(0.05), self.timerCallback)
+        timer = rospy.Timer(rospy.Duration(0.1), self.timerCallback)
         rospy.spin()
         timer.shutdown()
     def sonar0Callback(self, data):
