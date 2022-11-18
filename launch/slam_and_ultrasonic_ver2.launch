@@ -1,0 +1,7 @@
+<launch>
+    <node name = "serial_node" pkg = "rosserial_python" type = "serial_node.py">
+    <param name = "port" type = "string" value = "/dev/ttyUSB0"/>
+    <param name = "baund" type = "int" value = "57600"/>
+    </node>
+    <node name = "slam_and_ultrasonic" pkg = "slam_and_ultrasonic" type = "slam_and_ultrasonic_ver2.py" output = "screen"/>
+</launch>
