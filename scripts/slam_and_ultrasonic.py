@@ -256,21 +256,23 @@ class slam_and_ultrasonic:
             angleList = self.lib.generateAngleList(self.angularData)
             self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
             self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
-            self.turnCount += 1 
-            if self.turnCount == 36:
+            self.turnCount += 1
+            print("turnCount ", self.turnCount)
+            if self.turnCount > 36:
                 self.turnCommand == False
                 self.turnToMaxDistance = True
                 self.setTargetToMaxDistanceCommand = True
                 self.turnCount = 1
                 self.close += 1
         else:
-            if self.turnToMaxDistance ==True:
+            if self.turnToMaxDistance == True:
                 if self.setTargetToMaxDistanceCommand == True:
                     maxDistance = max(self.allDistance360)
                     indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
                     index = random.randint(0, len(indexList))
                     self.angleOfMaxDistance = self.allAngle360(indexList[index])
                     self.setTargetToMaxDistanceCommand = False
+                    print("Angle max ", self.angleOfMaxDistance)
                 [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
                 steps = self.lib.computeSteps(deltaAngle)
                 velocity = 1
@@ -317,7 +319,6 @@ class slam_and_ultrasonic:
                             self.backwardCommand = False
                             self.forwardCommand = False
                             self.turnCommand = True
-                            self.turnPIDCommand = True
                             self.setTargetCommand = True
         if self.close > 10:
             print('Done!')
