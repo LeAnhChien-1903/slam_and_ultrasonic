@@ -2,7 +2,6 @@
 import rospy
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
-from std_msgs.msg import UInt8
 import math
 import random
 import numpy as np
@@ -263,7 +262,7 @@ class slam_and_ultrasonic:
             target = self.lib.computeTarget(angle, 10, 0)
             [deltaAngle, orientation] = self.lib.computeDifferent(angle, target)
             steps = self.lib.computeSteps(deltaAngle)
-            velocity = 4
+            velocity = 1
             self.turn(velocity, orientation, steps)
             rate.sleep
 
