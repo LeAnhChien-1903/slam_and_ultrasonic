@@ -7,6 +7,10 @@ import math
 import random
 import numpy as np
 class slam_sonar_lib:
+    def __init__(self):
+        self.radius_wheel = 0.0425
+        self.b = 0.1974
+        self.circumference = self.radius_wheel * 2 * math.pi
     def computeDifferent(self, angleStart, angleEnd):
         result = 0
         orientation = 0
@@ -145,7 +149,7 @@ class slam_sonar_lib:
         response = P + I + D
         response = response
         sum = sumError
-        prev = error
+        prev = error 
 
         return response, sum, prev
     def addDataPoint(self,dataPointAll, dataPoint):
@@ -160,14 +164,14 @@ class slam_sonar_lib:
 
         return initData
     def computeSteps(self, deltaAngle):
-        b = 0.1974
-        steps = int(deltaAngle * math.pi/180 * b)
+        arc_length = self.b * (deltaAngle * math.pi / 180)
+        steps = int(arc_length * 200 / self.circumference) + 1
         return steps
 class slam_and_ultrasonic:
     def __init__(self):
         # Command to control
         self.turnCount = 1
-        self.close = 1
+        self.close = 0
         self.turnCommand = True
         self.turnPIDCommand = True
         self.setTargetCommand = True
@@ -177,10 +181,10 @@ class slam_and_ultrasonic:
         self.forwardCommand = False
         self.backwardCommand = False
         # PID parameter
-        self.kp = 15
+        self.kp = 10
         self.ki = 0
         self.kd = 0
-        self.deltaT = 0.05
+        self.deltaT = math.pi/100
         self.target = 0
         self.sum = 0
         self.prev = 0
@@ -214,8 +218,7 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar135", Float32, self.sonar135Callback)
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
-        rospy.Subscriber("/robot/motor/state",UInt8, self.motorStateCallback)
-        timer = rospy.Timer(rospy.Duration(0.1), self.timerCallback)
+        timer = rospy.Timer(rospy.Duration(1.5), self.timerCallback)
         rospy.spin()
         timer.shutdown()
     def sonar0Callback(self, data):
@@ -237,76 +240,48 @@ class slam_and_ultrasonic:
     def timerCallback(self, event):
         print("Angle = ", self.angularData)
         if self.turnCommand == True:
-            if self.setTargetCommand == True:
-                initial =  self.angularData
-                self.target = self.lib.computeTarget(initial, 10, 0)
-                print("Target = ", self.target)
-                [error, _ ]= self.lib.computeDifferent(initial, self.target)
-                self.sum =  0
-                self.prev =  error
-                self.setTargetCommand = False
-                self.turnPIDCommand = True
-            if self.turnPIDCommand == True:
-                [error, orientation] = self.lib.computeDifferent(self.angularData, self.target)
-                [velocity, self.sum, self.prev] = self.lib.pidResponse(error, self.kp, self.ki, self.kd, self.sum, self.prev, self.deltaT)
-                print("Error: ", error)
-                print("Target:", self.target)
-                print("Velocity:", velocity)            
-                self.turn(velocity, orientation)
-                if orientation == 0:
-                    self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData)
-                else:
-                    self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData)
-                if error < 1:
-                    print("Done angular")
-                    self.turnCount += 1
-                    self.setTargetCommand = True
-                    self.turnPIDCommand = False    
-                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                    dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                    angleList = self.lib.generateAngleList(self.angularData)
-                    self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
-                    self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
+            target = self.lib.computeTarget(self.angularData, 10, 0)
+            [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, target)
+            steps = self.lib.computeSteps(deltaAngle)
+            velocity = 1
+            self.turn(velocity, orientation, steps)
+            if orientation == 0:
+                self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData*steps)
+            else:
+                self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData*steps)
+            distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+            dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
+            self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+            angleList = self.lib.generateAngleList(self.angularData)
+            self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
+            self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
             if self.turnCount == 36:
                 self.turnCommand == False
-                self.setTargetCommand = True
-                self.turnPIDCommand = True
                 self.turnToMaxDistance = True
-                self.turnPIDToMaxDistance =  True
-                self.setTargetToMaxDistanceCommand = True
                 self.turnCount = 1
                 self.close += 1
         else:
             if self.turnToMaxDistance ==True:
-                if self.setTargetToMaxDistanceCommand == True:
-                    maxDistance = max(self.allDistance360)
-                    indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
-                    index = random.randint(0, len(indexList))
-                    self.angleOfMaxDistance = self.allAngle360(indexList[index])
-                    initial =  self.angularData
-                    [error, _] = self.lib.computeDifferent(initial, self.angleOfMaxDistance)
-                    self.sum = 0
-                    self.prev = error
-                    self.setTargetToMaxDistanceCommand = False
-                    self.allAngle360 = []
-                    self.allDistance360 = []
-                if self.turnPIDToMaxDistance == True:
-                    [error, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
-                    [velocity, self.sum, self.prev] = self.lib.pidResponse(error,self.kp, self.ki, self.kd, self.sum, self.prev, self.deltaT)
-                    self.turn(velocity, orientation)
+                [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, target)
+                steps = self.lib.computeSteps(deltaAngle)
+                velocity = 1
+                if (steps < 2):
+                    self.turnToMaxDistance = False
+                    self.forwardCommand = True
+                else :
+                    self.turn(velocity, orientation, steps)
                     if orientation == 0:
-                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT,velocity, 0, self.angularData)
+                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps,velocity, 0, self.angularData)
                     else:
-                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData)
-                    if error < 1:
-                        self.turnToMaxDistance = False
-                        self.forwardCommand = True
-                        self.turnPIDCommand = False
+                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, 0 , velocity, self.angularData)
+                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+                    dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
+                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
             if self.forwardCommand == True:
-                velocity = 5
-                self.forward(velocity)
-                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, velocity , velocity, self.angularData)
+                velocity = 1
+                steps = 30
+                self.forward(velocity, steps)
+                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, velocity , velocity, self.angularData)
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                 dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
@@ -320,9 +295,10 @@ class slam_and_ultrasonic:
                     self.forwardCommand = False
                     self.backwardCommand = True
             if self.backwardCommand == True:
-                velocity = 5
-                self.backward(velocity)
-                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, velocity , velocity, self.angularData)
+                velocity = 1
+                steps = 10
+                self.backward(velocity, steps)
+                self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, velocity , velocity, self.angularData)
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                 dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
@@ -336,7 +312,7 @@ class slam_and_ultrasonic:
                             self.setTargetCommand = True
         if self.close > 10:
             print('Done!')
-            self.motor_params.data = [0, 0]
+            self.motor_params.data = [0, 0, 0]
             self.pub_motor.publish(self.motor_params)
             rospy.loginfo(self.motor_params)
             new_array = np.array(self.dataPointAll)
@@ -345,22 +321,22 @@ class slam_and_ultrasonic:
             file.write(content)
             file.close()
                 
-    def turn(self, velocity, orientation):
+    def turn(self, velocity, orientation, steps):
         # orientation: 0 is turn right, 1 is turn left
-        if velocity > 8:
-            velocity = 8
+        if velocity > 4:
+            velocity = 4
         if orientation == 0:
-            self.motor_params.data = [velocity, 0]
+            self.motor_params.data = [velocity, 0, steps]
         else:
-            self.motor_params.data = [0, velocity]
+            self.motor_params.data = [0, velocity, steps]
         self.pub_motor.publish(self.motor_params)
         rospy.loginfo(self.motor_params)
-    def forward(self, velocity):
-        self.motor_params.data = [velocity, velocity]
+    def forward(self, velocity, steps):
+        self.motor_params.data = [velocity, velocity, steps]
         self.pub_motor.publish(self.motor_params)
         rospy.loginfo(self.motor_params)
-    def backward(self, velocity):
-        self.motor_params.data = [-velocity, -velocity]
+    def backward(self, velocity, steps):
+        self.motor_params.data = [-velocity, -velocity, steps]
         self.pub_motor.publish(self.motor_params)
         rospy.loginfo(self.motor_params)
 
