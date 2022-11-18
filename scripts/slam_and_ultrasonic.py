@@ -259,7 +259,7 @@ class slam_and_ultrasonic:
             self.turnCount += 1
             print("turnCount ", self.turnCount)
             if self.turnCount > 36:
-                self.turnCommand == False
+                self.turnCommand = False
                 self.turnToMaxDistance = True
                 self.setTargetToMaxDistanceCommand = True
                 self.turnCount = 1
