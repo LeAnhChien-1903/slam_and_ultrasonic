@@ -251,18 +251,27 @@ class slam_and_ultrasonic:
                 self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT, 0 , velocity, self.angularData*steps)
             distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
             dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
+            rospy.loginfo(dataPoint)
             self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
             angleList = self.lib.generateAngleList(self.angularData)
             self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
             self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
+            self.turnCount += 1 
             if self.turnCount == 36:
                 self.turnCommand == False
                 self.turnToMaxDistance = True
+                self.setTargetToMaxDistanceCommand = True
                 self.turnCount = 1
                 self.close += 1
         else:
             if self.turnToMaxDistance ==True:
-                [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, target)
+                if self.setTargetToMaxDistanceCommand == True:
+                    maxDistance = max(self.allDistance360)
+                    indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
+                    index = random.randint(0, len(indexList))
+                    self.angleOfMaxDistance = self.allAngle360(indexList[index])
+                    self.setTargetToMaxDistanceCommand = False
+                [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
                 steps = self.lib.computeSteps(deltaAngle)
                 velocity = 1
                 if (steps < 2):
@@ -314,7 +323,6 @@ class slam_and_ultrasonic:
             print('Done!')
             self.motor_params.data = [0, 0, 0]
             self.pub_motor.publish(self.motor_params)
-            rospy.loginfo(self.motor_params)
             new_array = np.array(self.dataPointAll)
             file = open("result.txt", "w+")
             content = str(new_array)
@@ -330,15 +338,15 @@ class slam_and_ultrasonic:
         else:
             self.motor_params.data = [0, velocity, steps]
         self.pub_motor.publish(self.motor_params)
-        rospy.loginfo(self.motor_params)
+        
     def forward(self, velocity, steps):
         self.motor_params.data = [velocity, velocity, steps]
         self.pub_motor.publish(self.motor_params)
-        rospy.loginfo(self.motor_params)
+        
     def backward(self, velocity, steps):
         self.motor_params.data = [-velocity, -velocity, steps]
         self.pub_motor.publish(self.motor_params)
-        rospy.loginfo(self.motor_params)
+        
 
 if __name__ == '__main__':
     print("Running")
