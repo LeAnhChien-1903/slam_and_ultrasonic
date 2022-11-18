@@ -180,15 +180,11 @@ class slam_and_ultrasonic:
         self.turnPIDToMaxDistance = True
         self.forwardCommand = False
         self.backwardCommand = False
-        # PID parameter
-        self.kp = 10
-        self.ki = 0
-        self.kd = 0
+        # Other parameter
         self.deltaT = math.pi/100
-        self.target = 0
-        self.sum = 0
-        self.prev = 0
         self.angleOfMaxDistance = 0
+        self.numOfTurn = 0
+        self.orientationMax = 0
         # Sensor data
         self.sonar0 = 0.0
         self.sonar45 = 0.0
@@ -271,25 +267,35 @@ class slam_and_ultrasonic:
                     indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
                     index = random.randint(0, len(indexList)-1)
                     self.angleOfMaxDistance = self.allAngle360[indexList[index]]
+                    self.numOfTurn = int(self.angleOfMaxDistance / 10)
                     self.setTargetToMaxDistanceCommand = False
                     self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
                     self.allAngle360 = []
+                    [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
                     print("Angle max ", self.angleOfMaxDistance)
-                [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
-                steps = self.lib.computeSteps(deltaAngle)
-                velocity = 1
-                if (steps < 2):
+                if (self.numOfTurn == 0):
+                    [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
+                    steps = self.lib.computeSteps(deltaAngle)
+                    velocity = 0.5
+                    self.turn(velocity, orientation,steps)
+                    if orientation == 0:
+                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps,velocity, 0, self.angularData)
+                    else:
+                        self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, 0 , velocity, self.angularData)
                     self.turnToMaxDistance = False
                     self.forwardCommand = True
-                else :
-                    self.turn(velocity, orientation, steps)
-                    if orientation == 0:
+                else:
+                    steps = 10
+                    velocity = 0.5
+                    self.turn(velocity, self.orientationMax, steps)
+                    if self.orientationMax == 0:
                         self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps,velocity, 0, self.angularData)
                     else:
                         self.position =  self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, 0 , velocity, self.angularData)
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.position[0], self.position[1], self.angularData, distanceList)
                     self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                    self.numOfTurn -= 1
             if self.forwardCommand == True:
                 velocity = 1
                 steps = 30
