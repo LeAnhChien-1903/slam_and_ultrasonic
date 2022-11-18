@@ -214,7 +214,7 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar135", Float32, self.sonar135Callback)
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
-        timer = rospy.Timer(rospy.Duration(1.5), self.timerCallback)
+        timer = rospy.Timer(rospy.Duration(2), self.timerCallback)
         rospy.spin()
         timer.shutdown()
     def sonar0Callback(self, data):
@@ -298,7 +298,7 @@ class slam_and_ultrasonic:
                     self.numOfTurn -= 1
             if self.forwardCommand == True:
                 velocity = 1
-                steps = 30
+                steps = 10
                 self.forward(velocity, steps)
                 self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, velocity , velocity, self.angularData)
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -315,7 +315,7 @@ class slam_and_ultrasonic:
                     self.backwardCommand = True
             if self.backwardCommand == True:
                 velocity = 1
-                steps = 10
+                steps = 5
                 self.backward(velocity, steps)
                 self.position = self.lib.computeNewPosition(self.position[0], self.position[1], self.deltaT*steps, velocity , velocity, self.angularData)
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
