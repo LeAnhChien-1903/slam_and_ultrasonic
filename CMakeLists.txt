@@ -207,3 +207,6 @@ include_directories(
 catkin_install_python(PROGRAMS scripts/slam_and_ultrasonic.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+catkin_install_python(PROGRAMS scripts/slam_and_ultrasonic_ver2.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
