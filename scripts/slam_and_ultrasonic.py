@@ -2,6 +2,7 @@
 import rospy
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
+from std_msgs.msg import UInt8
 import math
 import random
 import numpy as np
@@ -158,6 +159,10 @@ class slam_sonar_lib:
             initData.append(extraData[i])
 
         return initData
+    def computeSteps(self, deltaAngle):
+        b = 0.1974
+        steps = int(deltaAngle * math.pi/180 * b)
+        return steps
 class slam_and_ultrasonic:
     def __init__(self):
         # Command to control
@@ -188,6 +193,8 @@ class slam_and_ultrasonic:
         self.sonar180 = 0.0
         self.sonar270 = 0.0
         self.angularData = 0.0
+        # Motor data
+        self.motorState = 0
         # Store data
         self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
         self.allAngle360 = [] # List stores angle of distance data when robot rotates 360 degree
@@ -207,6 +214,7 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar135", Float32, self.sonar135Callback)
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
+        rospy.Subscriber("/robot/motor/state",UInt8, self.motorStateCallback)
         timer = rospy.Timer(rospy.Duration(0.1), self.timerCallback)
         rospy.spin()
         timer.shutdown()
@@ -224,6 +232,8 @@ class slam_and_ultrasonic:
         self.sonar270 = data.data
     def angularDataCallback(self, data):
         self.angularData = data.data
+    def motorStateCallback(self, data):
+        self.motorState = data.data
     def timerCallback(self, event):
         print("Angle = ", self.angularData)
         if self.turnCommand == True:
