@@ -252,11 +252,10 @@ class slam_and_ultrasonic:
         rospy.Subscriber("/robot/sensor/sonar180", Float32, self.sonar180Callback)
         rospy.Subscriber("/robot/sensor/sonar270", Float32, self.sonar270Callback)
     def slam_control(self):
-        rospy.init_node("slam_and_ultrasonic", anonymous= True)
+        rospy.init_node("slam_and_ultrasonic", anonymous = True)
         rate = rospy.Rate(1)
+        self.getDataInPosition()
         while not rospy.is_shutdown():
-            self.getDataInPosition()
-            self.motorState = 0
             angle = self.angularData
             print("Angle = ", angle)
             target = self.lib.computeTarget(angle, 10, 0)
@@ -264,6 +263,7 @@ class slam_and_ultrasonic:
             steps = self.lib.computeSteps(deltaAngle)
             velocity = 1
             self.turn(velocity, orientation, steps)
+            rospy.spin()
             rate.sleep
 
 if __name__ == '__main__':
