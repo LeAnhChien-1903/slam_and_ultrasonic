@@ -267,11 +267,11 @@ class slam_and_ultrasonic:
                     indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
                     index = random.randint(0, len(indexList)-1)
                     self.angleOfMaxDistance = self.allAngle360[indexList[index]]
-                    self.numOfTurn = int(self.angleOfMaxDistance / 10)
+                    [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
+                    self.numOfTurn = int(deltaAngle / 10)
                     self.setTargetToMaxDistanceCommand = False
                     self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
                     self.allAngle360 = []
-                    [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
                     print("Angle max ", self.angleOfMaxDistance)
                 if (self.numOfTurn == 0):
                     [deltaAngle, orientation] = self.lib.computeDifferent(self.angularData, self.angleOfMaxDistance)
