@@ -276,7 +276,7 @@ class slam_and_ultrasonic:
             print("Current Pose: ", self.pose)
             theta = self.pose[2]
             distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-            dataPoint = self.lib.extractPoint(self.position[0], self.position[1], theta, distanceList)
+            dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
             self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
             angleList = self.lib.generateAngleList(theta)
             self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
@@ -297,7 +297,7 @@ class slam_and_ultrasonic:
                     index = random.randint(0, len(indexList)-1)
                     self.angleOfMaxDistance = self.allAngle360[indexList[index]]
                     [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.pose[2], self.angleOfMaxDistance)
-                    stepsToMaxDistance= self.lib.computeSteps(deltaAngle)
+                    stepsToMaxDistance = self.lib.computeSteps(deltaAngle)
                     self.numOfTurn, self.remainSteps = divmod(stepsToMaxDistance, self.stepsTurn)
                     self.setTargetToMaxDistanceCommand = False
                     self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
@@ -313,7 +313,7 @@ class slam_and_ultrasonic:
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                    dataPoint = self.lib.extractPoint(self.position[0], self.position[1], theta, distanceList)
+                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                     self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                     self.turnToMaxDistance = False
                     self.forwardCommand = True
@@ -327,7 +327,7 @@ class slam_and_ultrasonic:
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                    dataPoint = self.lib.extractPoint(self.position[0], self.position[1], theta, distanceList)
+                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                     self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                     self.numOfTurn -= 1
             if self.forwardCommand == True:
@@ -340,7 +340,7 @@ class slam_and_ultrasonic:
                 print("Current Pose: ", self.pose)
                 theta = self.pose[2]
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                dataPoint = self.lib.extractPoint(self.position[0], self.position[1], theta, distanceList)
+                dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                 if self.sonar0 < 0.5:
                     self.forwardCommand = False
@@ -362,7 +362,7 @@ class slam_and_ultrasonic:
                 print("Current Pose: ", self.pose)
                 theta = self.pose[2]
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                dataPoint = self.lib.extractPoint(self.position[0], self.position[1], theta, distanceList)
+                dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                 if self.sonar0 > 0.4:
                     if self.sonar45 > 0.4:
