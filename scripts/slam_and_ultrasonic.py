@@ -203,13 +203,13 @@ class slam_and_ultrasonic:
         self.forwardCommand = False
         self.backwardCommand = False
         # Other parameter
-        self.deltaT = 2.3
+        self.deltaT = 2
         self.angleOfMaxDistance = 0
         self.numOfTurn = 0
         self.orientationMax = 0
         self.remainSteps = 0
         self.stepsTurn = 20
-        self.velocityToTurn = 0.3
+        self.velocityToTurn = 0.5
         self.velocityToForward = 0.5
         self.velocityToBackward = 0.5
         self.stepsForward = 20
