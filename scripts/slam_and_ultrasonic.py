@@ -203,13 +203,13 @@ class slam_and_ultrasonic:
         self.forwardCommand = False
         self.backwardCommand = False
         # Other parameter
-        self.deltaT = 2
+        self.deltaT = 2.3
         self.angleOfMaxDistance = 0
         self.numOfTurn = 0
         self.orientationMax = 0
         self.remainSteps = 0
         self.stepsTurn = 20
-        self.velocityToTurn = 0.5
+        self.velocityToTurn = 0.3
         self.velocityToForward = 0.5
         self.velocityToBackward = 0.5
         self.stepsForward = 20
@@ -266,13 +266,13 @@ class slam_and_ultrasonic:
         self.motorState = data.data
     def timerCallback(self, event):
         if self.turnCount < 1:
-            steps = 26
+            steps = 20
             velocity = self.velocityToTurn
             self.forward(velocity,steps)
             self.turnCount += 1
         else:
             if self.turnCommand == True:
-                steps = 26
+                steps = 20
                 velocity = self.velocityToTurn
                 orientation = 0 # turn right
                 self.turn(velocity, orientation, steps)
@@ -383,16 +383,16 @@ class slam_and_ultrasonic:
                                 self.backwardCommand = False
                                 self.forwardCommand = False
                                 self.turnCommand = True
-                                self.setTargetCommand = True
             if self.close > 2:
                 print('Done!')
                 self.motor_params.data = [0, 0, 0]
                 self.pub_motor.publish(self.motor_params)
                 new_array = np.array(self.dataPointAll)
-                file = open("result.txt", "w+")
+                file = open("/home/ubuntu/catkin_ws/src/slam_and_ultrasonic/scripts/result.txt", "w+")
                 content = str(new_array)
                 file.write(content)
-                file.close()            
+                file.close()           
+                self.turnCommand = False 
     def turn(self, velocity, orientation, steps):
         # orientation: 0 is turn right, 1 is turn left
         if orientation == 0:
