@@ -63,7 +63,7 @@ class slam_sonar_lib:
             theta_new = theta_new - 360 # degree
         if theta_new < -180:
             theta_new = theta_new + 360 # degree
-        return x_new, y_new, theta_new
+        return [x_new, y_new, theta_new]
     def computeTarget(self, angleStart, difference, orientation):
         if orientation == 0:
             result = angleStart - difference
@@ -221,7 +221,7 @@ class slam_and_ultrasonic:
         self.sonar135 = 0.0
         self.sonar180 = 0.0
         self.sonar270 = 0.0
-        self.angularData = 0.0
+        #self.angularData = 0.0
         # Motor data
         self.omegaLeft = 0.0
         self.omegaRight = 0.0
@@ -231,7 +231,7 @@ class slam_and_ultrasonic:
         self.allAngle360 = [] # List stores angle of distance data when robot rotates 360 degree
         self.dataPointAll = [[],[]] # List stores data of map
         # Position of robot
-        self.pose = [0.0, 0.0, math.pi/2]
+        self.pose = [0.0, 0.0, 90.0]
         # Publishers
         self.motor_params = Float32MultiArray()
         self.pub_motor = rospy.Publisher("/robot/motor", Float32MultiArray, queue_size = 100)
@@ -272,7 +272,7 @@ class slam_and_ultrasonic:
             self.turn(velocity, orientation, steps)
             omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
             print("Previous Pose: ", self.pose)
-            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
             print("Current Pose: ", self.pose)
             theta = self.pose[2]
             distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -309,7 +309,10 @@ class slam_and_ultrasonic:
                     self.turn(velocity, self.orientationMax, steps)
                     omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps,self.orientationMax, self.stepsOfRevolution, self.deltaT)
                     print("Previous Pose: ", self.pose)
-                    self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+                    if self.orientationMax == 0:
+                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                    elif self.orientationMax == 1:
+                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -323,7 +326,10 @@ class slam_and_ultrasonic:
                     self.turn(velocity, self.orientationMax, steps)
                     omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, self.orientationMax, self.stepsOfRevolution, self.deltaT)
                     print("Previous Pose: ", self.pose)
-                    self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+                    if self.orientationMax == 0:
+                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                    elif self.orientationMax == 1:
+                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -333,6 +339,7 @@ class slam_and_ultrasonic:
             if self.forwardCommand == True:
                 velocity = self.velocityToForward
                 steps = self.stepsForward
+                self.forward(velocity, steps)
                 orientation = -1 # Forward
                 omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
                 print("Previous Pose: ", self.pose)
@@ -354,6 +361,7 @@ class slam_and_ultrasonic:
             if self.backwardCommand == True:
                 velocity = self.velocityToBackward
                 steps = self.stepsBackward
+                self.backward(velocity, steps)
                 orientation = -2
                 self.backward(velocity, steps)
                 omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
