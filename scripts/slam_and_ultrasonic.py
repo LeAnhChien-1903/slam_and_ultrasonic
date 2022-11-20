@@ -355,7 +355,7 @@ class slam_and_ultrasonic:
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                     self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                    if self.sonar0 < 0.5:
+                    if self.sonar90 < 0.5:
                         self.forwardCommand = False
                         self.backwardCommand = True
                     if self.sonar45 < 0.1:
@@ -377,7 +377,7 @@ class slam_and_ultrasonic:
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                     self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                    if self.sonar0 > 0.4:
+                    if self.sonar90 > 0.4:
                         if self.sonar45 > 0.4:
                             if self.sonar135 > 0.4:
                                 self.backwardCommand = False
