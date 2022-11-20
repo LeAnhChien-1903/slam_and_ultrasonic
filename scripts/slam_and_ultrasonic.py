@@ -195,7 +195,7 @@ class slam_sonar_lib:
 class slam_and_ultrasonic:
     def __init__(self):
         # Command to control
-        self.turnCount = 1
+        self.turnCount = -2
         self.close = 0
         self.turnCommand = True
         self.turnToMaxDistance = False
@@ -265,129 +265,134 @@ class slam_and_ultrasonic:
     def motorStateCallback(self, data):
         self.motorState = data.data
     def timerCallback(self, event):
-        if self.turnCommand == True:
+        if self.turnCount < 1:
             steps = 26
             velocity = self.velocityToTurn
-            orientation = 0 # turn right
-            self.turn(velocity, orientation, steps)
-            omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
-            print("Previous Pose: ", self.pose)
-            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
-            print("Current Pose: ", self.pose)
-            theta = self.pose[2]
-            distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-            dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-            self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-            angleList = self.lib.generateAngleList(theta)
-            self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
-            self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
+            self.forward(velocity,steps)
             self.turnCount += 1
-            print("turnCount ", self.turnCount)
-            if self.turnCount == 36:
-                self.turnCommand = False
-                self.turnToMaxDistance = True
-                self.setTargetToMaxDistanceCommand = True
-                self.turnCount = 1
-                self.close += 1
         else:
-            if self.turnToMaxDistance == True:
-                if self.setTargetToMaxDistanceCommand == True:
-                    maxDistance = max(self.allDistance360)
-                    indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
-                    index = random.randint(0, len(indexList)-1)
-                    self.angleOfMaxDistance = self.allAngle360[indexList[index]]
-                    [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.pose[2], self.angleOfMaxDistance)
-                    stepsToMaxDistance = self.lib.computeSteps(deltaAngle)
-                    self.numOfTurn, self.remainSteps = divmod(stepsToMaxDistance, self.stepsTurn)
-                    self.setTargetToMaxDistanceCommand = False
-                    self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
-                    self.allAngle360 = []
-                    print("Angle max ", self.angleOfMaxDistance)
-                if (self.numOfTurn == 0):
-                    steps = self.remainSteps
-                    velocity = self.velocityToTurn
-                    self.turn(velocity, self.orientationMax, steps)
-                    omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps,self.orientationMax, self.stepsOfRevolution, self.deltaT)
-                    print("Previous Pose: ", self.pose)
-                    if self.orientationMax == 0:
-                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
-                    elif self.orientationMax == 1:
-                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
-                    print("Current Pose: ", self.pose)
-                    theta = self.pose[2]
-                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                    self.turnToMaxDistance = False
-                    self.forwardCommand = True
-                else:
-                    steps = self.stepsTurn
-                    velocity = self.velocityToTurn
-                    self.turn(velocity, self.orientationMax, steps)
-                    omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, self.orientationMax, self.stepsOfRevolution, self.deltaT)
-                    print("Previous Pose: ", self.pose)
-                    if self.orientationMax == 0:
-                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
-                    elif self.orientationMax == 1:
-                        self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
-                    print("Current Pose: ", self.pose)
-                    theta = self.pose[2]
-                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                    self.numOfTurn -= 1
-            if self.forwardCommand == True:
-                velocity = self.velocityToForward
-                steps = self.stepsForward
-                self.forward(velocity, steps)
-                orientation = -1 # Forward
+            if self.turnCommand == True:
+                steps = 26
+                velocity = self.velocityToTurn
+                orientation = 0 # turn right
+                self.turn(velocity, orientation, steps)
                 omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
                 print("Previous Pose: ", self.pose)
-                self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+                self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
                 print("Current Pose: ", self.pose)
                 theta = self.pose[2]
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                 dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
                 self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                if self.sonar0 < 0.5:
-                    self.forwardCommand = False
-                    self.backwardCommand = True
-                if self.sonar45 < 0.1:
-                    self.forwardCommand = False
-                    self.backwardCommand = True
-                if self.sonar135 < 0.1:
-                    self.forwardCommand = False
-                    self.backwardCommand = True
-            if self.backwardCommand == True:
-                velocity = self.velocityToBackward
-                steps = self.stepsBackward
-                self.backward(velocity, steps)
-                orientation = -2
-                self.backward(velocity, steps)
-                omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
-                print("Previous Pose: ", self.pose)
-                self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
-                print("Current Pose: ", self.pose)
-                theta = self.pose[2]
-                distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
-                dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
-                if self.sonar0 > 0.4:
-                    if self.sonar45 > 0.4:
-                        if self.sonar135 > 0.4:
-                            self.backwardCommand = False
-                            self.forwardCommand = False
-                            self.turnCommand = True
-                            self.setTargetCommand = True
-        if self.close > 2:
-            print('Done!')
-            self.motor_params.data = [0, 0, 0]
-            self.pub_motor.publish(self.motor_params)
-            new_array = np.array(self.dataPointAll)
-            file = open("result.txt", "w+")
-            content = str(new_array)
-            file.write(content)
-            file.close()            
+                angleList = self.lib.generateAngleList(theta)
+                self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
+                self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
+                print("turnCount ", self.turnCount)
+                self.turnCount += 1
+                if self.turnCount == 36:
+                    self.turnCommand = False
+                    self.turnToMaxDistance = True
+                    self.setTargetToMaxDistanceCommand = True
+                    self.turnCount = 1
+                    self.close += 1
+            else:
+                if self.turnToMaxDistance == True:
+                    if self.setTargetToMaxDistanceCommand == True:
+                        maxDistance = max(self.allDistance360)
+                        indexList = [i for i, x in enumerate(self.allDistance360) if x == maxDistance]
+                        index = random.randint(0, len(indexList)-1)
+                        self.angleOfMaxDistance = self.allAngle360[indexList[index]]
+                        [deltaAngle, self.orientationMax] = self.lib.computeDifferent(self.pose[2], self.angleOfMaxDistance)
+                        stepsToMaxDistance = self.lib.computeSteps(deltaAngle)
+                        self.numOfTurn, self.remainSteps = divmod(stepsToMaxDistance, self.stepsTurn)
+                        self.setTargetToMaxDistanceCommand = False
+                        self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
+                        self.allAngle360 = []
+                        print("Angle max ", self.angleOfMaxDistance)
+                    if (self.numOfTurn == 0):
+                        steps = self.remainSteps
+                        velocity = self.velocityToTurn
+                        self.turn(velocity, self.orientationMax, steps)
+                        omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps,self.orientationMax, self.stepsOfRevolution, self.deltaT)
+                        print("Previous Pose: ", self.pose)
+                        if self.orientationMax == 0:
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                        elif self.orientationMax == 1:
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
+                        print("Current Pose: ", self.pose)
+                        theta = self.pose[2]
+                        distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+                        dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
+                        self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                        self.turnToMaxDistance = False
+                        self.forwardCommand = True
+                    else:
+                        steps = self.stepsTurn
+                        velocity = self.velocityToTurn
+                        self.turn(velocity, self.orientationMax, steps)
+                        omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, self.orientationMax, self.stepsOfRevolution, self.deltaT)
+                        print("Previous Pose: ", self.pose)
+                        if self.orientationMax == 0:
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                        elif self.orientationMax == 1:
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
+                        print("Current Pose: ", self.pose)
+                        theta = self.pose[2]
+                        distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+                        dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
+                        self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                        self.numOfTurn -= 1
+                if self.forwardCommand == True:
+                    velocity = self.velocityToForward
+                    steps = self.stepsForward
+                    self.forward(velocity, steps)
+                    orientation = -1 # Forward
+                    omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
+                    print("Previous Pose: ", self.pose)
+                    self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+                    print("Current Pose: ", self.pose)
+                    theta = self.pose[2]
+                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
+                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                    if self.sonar0 < 0.5:
+                        self.forwardCommand = False
+                        self.backwardCommand = True
+                    if self.sonar45 < 0.1:
+                        self.forwardCommand = False
+                        self.backwardCommand = True
+                    if self.sonar135 < 0.1:
+                        self.forwardCommand = False
+                        self.backwardCommand = True
+                if self.backwardCommand == True:
+                    velocity = self.velocityToBackward
+                    steps = self.stepsBackward
+                    self.backward(velocity, steps)
+                    orientation = -2
+                    omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
+                    print("Previous Pose: ", self.pose)
+                    self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
+                    print("Current Pose: ", self.pose)
+                    theta = self.pose[2]
+                    distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
+                    dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
+                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                    if self.sonar0 > 0.4:
+                        if self.sonar45 > 0.4:
+                            if self.sonar135 > 0.4:
+                                self.backwardCommand = False
+                                self.forwardCommand = False
+                                self.turnCommand = True
+                                self.setTargetCommand = True
+            if self.close > 2:
+                print('Done!')
+                self.motor_params.data = [0, 0, 0]
+                self.pub_motor.publish(self.motor_params)
+                new_array = np.array(self.dataPointAll)
+                file = open("result.txt", "w+")
+                content = str(new_array)
+                file.write(content)
+                file.close()            
     def turn(self, velocity, orientation, steps):
         # orientation: 0 is turn right, 1 is turn left
         if orientation == 0:
