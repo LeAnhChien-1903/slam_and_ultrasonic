@@ -231,7 +231,7 @@ class slam_and_ultrasonic:
         self.allAngle360 = [] # List stores angle of distance data when robot rotates 360 degree
         self.dataPointAll = [[],[]] # List stores data of map
         # Position of robot
-        self.pose = [0.0, 0.0, 0.0]
+        self.pose = [0.0, 0.0, 90.0]
         # Publishers
         self.motor_params = Float32MultiArray()
         self.pub_motor = rospy.Publisher("/robot/motor", Float32MultiArray, queue_size = 100)
@@ -306,7 +306,7 @@ class slam_and_ultrasonic:
                 if (self.numOfTurn == 0):
                     steps = self.remainSteps
                     velocity = self.velocityToTurn
-                    self.turn(velocity, orientation,steps)
+                    self.turn(velocity, self.orientationMax, steps)
                     omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps,self.orientationMax, self.stepsOfRevolution, self.deltaT)
                     print("Previous Pose: ", self.pose)
                     self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
