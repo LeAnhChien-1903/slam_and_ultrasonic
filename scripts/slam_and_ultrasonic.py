@@ -231,7 +231,7 @@ class slam_and_ultrasonic:
         self.allAngle360 = [] # List stores angle of distance data when robot rotates 360 degree
         self.dataPointAll = [[],[]] # List stores data of map
         # Position of robot
-        self.pose = [0.0, 0.0, 90.0]
+        self.pose = [0.0, 0.0, math.pi/2]
         # Publishers
         self.motor_params = Float32MultiArray()
         self.pub_motor = rospy.Publisher("/robot/motor", Float32MultiArray, queue_size = 100)
