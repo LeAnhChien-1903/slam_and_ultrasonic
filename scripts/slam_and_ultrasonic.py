@@ -289,7 +289,7 @@ class slam_and_ultrasonic:
                 self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
                 print("turnCount ", self.turnCount)
                 self.turnCount += 1
-                if self.turnCount == 36:
+                if self.turnCount == 50:
                     self.turnCommand = False
                     self.turnToMaxDistance = True
                     self.setTargetToMaxDistanceCommand = True
