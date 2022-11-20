@@ -209,9 +209,9 @@ class slam_and_ultrasonic:
         self.orientationMax = 0
         self.remainSteps = 0
         self.stepsTurn = 20
-        self.velocityToTurn = 1
-        self.velocityToForward = 1
-        self.velocityToBackward = 1
+        self.velocityToTurn = 0.5
+        self.velocityToForward = 0.5
+        self.velocityToBackward = 0.5
         self.stepsForward = 20
         self.stepsBackward = 20
         # Sensor data
