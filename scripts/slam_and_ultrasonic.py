@@ -350,7 +350,6 @@ class slam_and_ultrasonic:
                         data_str = str(data)
                         self.file.write(data_str)
                         self.file.write("\n")
-                        self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                         self.numOfTurn -= 1
                 if self.forwardCommand == True:
                     velocity = self.velocityToForward
