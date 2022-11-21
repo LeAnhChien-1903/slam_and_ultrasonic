@@ -229,7 +229,7 @@ class slam_and_ultrasonic:
         # Store data
         self.allDistance360 = [] # List stores distance data when robot rotates 360 degree
         self.allAngle360 = [] # List stores angle of distance data when robot rotates 360 degree
-        self.dataPointAll = [[],[]] # List stores data of map
+        self.file = open("/home/ubuntu/catkin_ws/src/slam_and_ultrasonic/scripts/result.txt", "w+")
         # Position of robot
         self.pose = [0.0, 0.0, 90.0]
         # Publishers
@@ -283,7 +283,10 @@ class slam_and_ultrasonic:
                 theta = self.pose[2]
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                 dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                data = np.array(dataPoint)
+                data_str = str(data)
+                self.file.write(data_str)
+                self.file.write("\n")
                 angleList = self.lib.generateAngleList(theta)
                 self.allDistance360 = self.lib.addArray(self.allDistance360, distanceList)
                 self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
@@ -323,7 +326,10 @@ class slam_and_ultrasonic:
                         theta = self.pose[2]
                         distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                         dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                        self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                        data = np.array(dataPoint)
+                        data_str = str(data)
+                        self.file.write(data_str)
+                        self.file.write("\n")
                         self.turnToMaxDistance = False
                         self.forwardCommand = True
                     else:
@@ -340,6 +346,10 @@ class slam_and_ultrasonic:
                         theta = self.pose[2]
                         distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                         dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
+                        data = np.array(dataPoint)
+                        data_str = str(data)
+                        self.file.write(data_str)
+                        self.file.write("\n")
                         self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
                         self.numOfTurn -= 1
                 if self.forwardCommand == True:
@@ -354,7 +364,10 @@ class slam_and_ultrasonic:
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                    data = np.array(dataPoint)
+                    data_str = str(data)
+                    self.file.write(data_str)
+                    self.file.write("\n")
                     if self.sonar90 < 0.5:
                         self.forwardCommand = False
                         self.backwardCommand = True
@@ -376,7 +389,10 @@ class slam_and_ultrasonic:
                     theta = self.pose[2]
                     distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
                     dataPoint = self.lib.extractPoint(self.pose[0], self.pose[1], theta, distanceList)
-                    self.dataPointAll =  self.lib.addDataPoint(self.dataPointAll, dataPoint)
+                    data = np.array(dataPoint)
+                    data_str = str(data)
+                    self.file.write(data_str)
+                    self.file.write("\n")
                     if self.sonar90 > 0.4:
                         if self.sonar45 > 0.4:
                             if self.sonar135 > 0.4:
@@ -387,11 +403,7 @@ class slam_and_ultrasonic:
                 print('Done!')
                 self.motor_params.data = [0, 0, 0]
                 self.pub_motor.publish(self.motor_params)
-                new_array = np.array(self.dataPointAll)
-                file = open("/home/ubuntu/catkin_ws/src/slam_and_ultrasonic/scripts/result.txt", "w+")
-                content = str(new_array)
-                file.write(content)
-                file.close()           
+                self.file.close()           
                 self.turnCommand = False 
     def turn(self, velocity, orientation, steps):
         # orientation: 0 is turn right, 1 is turn left
