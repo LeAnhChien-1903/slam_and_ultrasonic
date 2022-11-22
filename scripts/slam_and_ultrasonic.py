@@ -208,12 +208,12 @@ class slam_and_ultrasonic:
         self.numOfTurn = 0
         self.orientationMax = 0
         self.remainSteps = 0
-        self.stepsTurn = 20
-        self.velocityToTurn = 0.5
-        self.velocityToForward = 0.5
-        self.velocityToBackward = 0.5
-        self.stepsForward = 20
-        self.stepsBackward = 20
+        self.stepsTurn = 25
+        self.velocityToTurn = 1
+        self.velocityToForward = 1
+        self.velocityToBackward = 1
+        self.stepsForward = 25
+        self.stepsBackward = 25
         # Sensor data
         self.sonar0 = 0.0
         self.sonar45 = 0.0
@@ -272,13 +272,12 @@ class slam_and_ultrasonic:
             self.turnCount += 1
         else:
             if self.turnCommand == True:
-                steps = 20
+                steps = self.stepsTurn
                 velocity = self.velocityToTurn
                 orientation = 0 # turn right
                 self.turn(velocity, orientation, steps)
                 omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
-                print("Previous Pose: ", self.pose)
-                self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaRight, omegaLeft)
                 print("Current Pose: ", self.pose)
                 theta = self.pose[2]
                 distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -292,7 +291,7 @@ class slam_and_ultrasonic:
                 self.allAngle360 = self.lib.addArray(self.allAngle360, angleList)
                 print("turnCount ", self.turnCount)
                 self.turnCount += 1
-                if self.turnCount == 50:
+                if self.turnCount > 50:
                     self.turnCommand = False
                     self.turnToMaxDistance = True
                     self.setTargetToMaxDistanceCommand = True
@@ -317,11 +316,10 @@ class slam_and_ultrasonic:
                         velocity = self.velocityToTurn
                         self.turn(velocity, self.orientationMax, steps)
                         omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps,self.orientationMax, self.stepsOfRevolution, self.deltaT)
-                        print("Previous Pose: ", self.pose)
                         if self.orientationMax == 0:
-                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaRight, omegaLeft)
                         elif self.orientationMax == 1:
-                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaRight, omegaLeft)
                         print("Current Pose: ", self.pose)
                         theta = self.pose[2]
                         distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -337,11 +335,10 @@ class slam_and_ultrasonic:
                         velocity = self.velocityToTurn
                         self.turn(velocity, self.orientationMax, steps)
                         omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, self.orientationMax, self.stepsOfRevolution, self.deltaT)
-                        print("Previous Pose: ", self.pose)
                         if self.orientationMax == 0:
-                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, -omegaLeft, omegaRight)
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaRight, omegaLeft)
                         elif self.orientationMax == 1:
-                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, -omegaRight)
+                            self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaRight, omegaLeft)
                         print("Current Pose: ", self.pose)
                         theta = self.pose[2]
                         distanceList = [self.sonar0, self.sonar90, self.sonar180, self.sonar270]
@@ -357,7 +354,6 @@ class slam_and_ultrasonic:
                     self.forward(velocity, steps)
                     orientation = -1 # Forward
                     omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
-                    print("Previous Pose: ", self.pose)
                     self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
@@ -382,7 +378,6 @@ class slam_and_ultrasonic:
                     self.backward(velocity, steps)
                     orientation = -2
                     omegaLeft, omegaRight = self.lib.computeAngularVelocity(steps, orientation, self.stepsOfRevolution, self.deltaT)
-                    print("Previous Pose: ", self.pose)
                     self.pose = self.lib.computeNewPose(self.pose, self.deltaT, omegaLeft, omegaRight)
                     print("Current Pose: ", self.pose)
                     theta = self.pose[2]
