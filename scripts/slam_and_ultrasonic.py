@@ -81,14 +81,13 @@ class slam_sonar_lib:
         dataPoint = [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
         theta = orientation
         if distanceList[0] != 2.5:
-            distanceList[0] = distanceList[0] + 0.082
+            distanceList[0] = distanceList[0] + 0.067
         if distanceList[1] != 2.5:
-            distanceList[1] = distanceList[1] + 0.067
+            distanceList[1] = distanceList[1] + 0.082
         if distanceList[2] != 2.5:
-            distanceList[2] = distanceList[2] + 0.082
+            distanceList[2] = distanceList[2] + 0.067
         if distanceList[3] != 2.5:
-            distanceList[3] =  distanceList[3] + 0.067
-        
+            distanceList[3] =  distanceList[3] + 0.082
         if 0 <= orientation <= 90:
             AO = distanceList[1]
             BO = distanceList[2]
@@ -208,12 +207,12 @@ class slam_and_ultrasonic:
         self.numOfTurn = 0
         self.orientationMax = 0
         self.remainSteps = 0
-        self.stepsTurn = 25
-        self.velocityToTurn = 1
-        self.velocityToForward = 1
-        self.velocityToBackward = 1
-        self.stepsForward = 25
-        self.stepsBackward = 25
+        self.stepsTurn = 20
+        self.velocityToTurn = 0.5
+        self.velocityToForward = 0.5
+        self.velocityToBackward = 0.5
+        self.stepsForward = 20
+        self.stepsBackward = 20
         # Sensor data
         self.sonar0 = 0.0
         self.sonar45 = 0.0
