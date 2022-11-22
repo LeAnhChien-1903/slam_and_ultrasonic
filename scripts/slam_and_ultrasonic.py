@@ -393,7 +393,7 @@ class slam_and_ultrasonic:
                                 self.backwardCommand = False
                                 self.forwardCommand = False
                                 self.turnCommand = True
-            if self.close > 2:
+            if self.close > 5:
                 print('Done!')
                 self.motor_params.data = [0, 0, 0]
                 self.pub_motor.publish(self.motor_params)
